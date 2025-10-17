@@ -646,11 +646,16 @@
                 }
 
                 startRace(data) {
-                    this.socketManager.hideLoading();
-                    // For now, just alert - we'll implement the actual game next
-                    alert(`Race starting against ${data.player2.username}! Game would start now.`);
-                    console.log('Race data:', data);
-                }
+    this.socketManager.hideLoading();
+    console.log('🏁 Race starting, redirecting to game...', data);
+    
+    // Store race data for the game page
+    localStorage.setItem('raceData', JSON.stringify(data));
+    localStorage.setItem('playerId', this.socketManager.socket.id);
+    
+    // Redirect to game page
+    window.location.href = 'game.html';
+}
 
                 showStatus(message) {
                     // Simple status message
