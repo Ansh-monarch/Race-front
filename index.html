@@ -17,37 +17,54 @@
             color: white;
             min-height: 100vh;
             overflow-x: hidden;
+            padding: 10px;
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 15px;
         }
 
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
+            padding: 20px;
         }
 
         header h1 {
-            font-size: 3em;
+            font-size: 2.5em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         header p {
-            font-size: 1.2em;
+            font-size: 1.1em;
             opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .online-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            backdrop-filter: blur(10px);
         }
 
         .section {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 30px;
+            border-radius: 20px;
+            padding: 25px;
             margin-bottom: 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
 
         .hidden {
@@ -56,79 +73,113 @@
 
         .input-group {
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 15px;
             max-width: 400px;
             margin: 0 auto;
         }
 
+        @media (min-width: 768px) {
+            .input-group {
+                flex-direction: row;
+            }
+        }
+
         input[type="text"] {
             flex: 1;
-            padding: 12px 15px;
+            padding: 15px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 16px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         button {
-            padding: 12px 24px;
+            padding: 15px 25px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         #join-btn {
-            background: #4CAF50;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
             color: white;
         }
 
         #join-btn:hover {
-            background: #45a049;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        #join-btn:active {
+            transform: translateY(-1px);
         }
 
         .players-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-height: 300px;
+            gap: 12px;
+            max-height: 50vh;
             overflow-y: auto;
+            padding: 10px;
         }
 
         .player-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .player-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(5px);
         }
 
         .player-name {
             font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .player-status {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-left: 10px;
         }
 
         .challenge-btn {
-            background: #FF9800;
+            background: linear-gradient(45deg, #FF9800, #F57C00);
             color: white;
-            padding: 8px 16px;
+            padding: 10px 20px;
             font-size: 14px;
+            border-radius: 25px;
+            min-width: 120px;
         }
 
         .challenge-btn:hover {
-            background: #F57C00;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .challenge-btn:active {
+            transform: translateY(0);
         }
 
         .empty-state {
             text-align: center;
-            padding: 40px;
+            padding: 40px 20px;
             opacity: 0.7;
             font-style: italic;
+            font-size: 1.1em;
         }
 
         .notification {
@@ -137,52 +188,62 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            padding: 20px;
         }
 
         .challenge-content {
-            background: white;
-            color: #333;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
             padding: 30px;
-            border-radius: 15px;
+            border-radius: 25px;
             text-align: center;
             max-width: 400px;
-            width: 90%;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
         .challenge-content h3 {
-            color: #e74c3c;
-            margin-bottom: 10px;
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-size: 1.8em;
         }
 
         .challenge-buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 15px;
+            margin-top: 25px;
+            flex-direction: column;
+        }
+
+        @media (min-width: 480px) {
+            .challenge-buttons {
+                flex-direction: row;
+            }
         }
 
         .btn-accept {
-            background: #4CAF50;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
             color: white;
             flex: 1;
+            padding: 15px;
         }
 
         .btn-decline {
-            background: #e74c3c;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
             color: white;
             flex: 1;
+            padding: 15px;
         }
 
-        .btn-accept:hover {
-            background: #45a049;
-        }
-
-        .btn-decline:hover {
-            background: #c0392b;
+        .btn-accept:hover, .btn-decline:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
         }
 
         .loading {
@@ -191,7 +252,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -202,9 +263,9 @@
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            border-top: 4px solid white;
-            width: 40px;
-            height: 40px;
+            border-top: 4px solid #FFD700;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
@@ -216,57 +277,120 @@
 
         .user-info {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @media (min-width: 768px) {
+            .user-info {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        #current-user {
+            font-weight: bold;
+            font-size: 1.1em;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-align: center;
         }
 
         #leave-lobby {
-            background: #e74c3c;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
             color: white;
+            padding: 12px 25px;
         }
 
         #leave-lobby:hover {
-            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .connected {
+            background: rgba(76, 175, 80, 0.9);
+        }
+
+        .disconnected {
+            background: rgba(231, 76, 60, 0.9);
+        }
+
+        /* Scrollbar styling */
+        .players-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .players-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .players-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .players-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
         }
     </style>
 </head>
 <body>
+    <div id="connection-status" class="connection-status hidden"></div>
+
     <div class="container">
         <header>
             <h1>🚗 BOOST DASH</h1>
             <p>Challenge players to intense 1v1 races!</p>
+            <div class="online-count">
+                <span id="online-count">0</span> players online
+            </div>
         </header>
 
         <div id="username-section" class="section">
-            <h2>Enter the Arena</h2>
+            <h2>🎯 Enter the Arena</h2>
             <div class="input-group">
                 <input type="text" id="username-input" placeholder="Enter your racer name" maxlength="20">
-                <button id="join-btn">JOIN LOBBY</button>
+                <button id="join-btn">🎮 JOIN LOBBY</button>
             </div>
         </div>
 
         <div id="lobby-section" class="section hidden">
-            <h2>Online Racers</h2>
+            <h2>👥 Online Racers</h2>
             <div id="players-list" class="players-list">
-                <div class="empty-state">No other players online...</div>
+                <div class="empty-state">Waiting for players to join...</div>
             </div>
             
             <div class="user-info">
                 <span id="current-user"></span>
-                <button id="leave-lobby">LEAVE LOBBY</button>
+                <button id="leave-lobby">🚪 LEAVE LOBBY</button>
             </div>
         </div>
 
         <div id="challenge-notification" class="notification hidden">
             <div class="challenge-content">
-                <h3>🚨 CHALLENGE!</h3>
+                <h3>⚡ CHALLENGE!</h3>
                 <p id="challenger-name">Player wants to race!</p>
                 <div class="challenge-buttons">
-                    <button id="accept-challenge" class="btn-accept">ACCEPT</button>
-                    <button id="decline-challenge" class="btn-decline">DECLINE</button>
+                    <button id="accept-challenge" class="btn-accept">🎯 ACCEPT</button>
+                    <button id="decline-challenge" class="btn-decline">❌ DECLINE</button>
                 </div>
             </div>
         </div>
@@ -279,7 +403,6 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // Socket Manager
         class SocketManager {
             constructor() {
                 this.socket = null;
@@ -295,18 +418,18 @@
                     this.socket.on('connect', () => {
                         console.log('Connected to server');
                         this.isConnected = true;
-                        this.showStatus('Connected to server', 'success');
+                        this.updateConnectionStatus('Connected', 'connected');
                     });
 
                     this.socket.on('disconnect', () => {
                         console.log('Disconnected from server');
                         this.isConnected = false;
-                        this.showStatus('Disconnected from server', 'error');
+                        this.updateConnectionStatus('Disconnected', 'disconnected');
                     });
 
                     this.socket.on('connect_error', (error) => {
                         console.error('Connection error:', error);
-                        this.showStatus('Connection failed. Retrying...', 'error');
+                        this.updateConnectionStatus('Connection Failed', 'disconnected');
                         setTimeout(() => this.connect(), 3000);
                     });
 
@@ -315,25 +438,11 @@
                 }
             }
 
-            showStatus(message, type) {
-                const status = document.createElement('div');
-                status.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    padding: 10px 20px;
-                    border-radius: 5px;
-                    color: white;
-                    font-weight: bold;
-                    z-index: 10000;
-                    background: ${type === 'success' ? '#4CAF50' : '#e74c3c'};
-                `;
-                status.textContent = message;
-                document.body.appendChild(status);
-
-                setTimeout(() => {
-                    document.body.removeChild(status);
-                }, 3000);
+            updateConnectionStatus(message, type) {
+                const statusEl = document.getElementById('connection-status');
+                statusEl.textContent = `🔗 ${message}`;
+                statusEl.className = `connection-status ${type}`;
+                statusEl.classList.remove('hidden');
             }
 
             emit(event, data) {
@@ -357,7 +466,6 @@
             }
         }
 
-        // Lobby Manager
         class LobbyManager {
             constructor() {
                 this.currentUser = null;
@@ -390,6 +498,11 @@
 
                 document.getElementById('decline-challenge').addEventListener('click', () => {
                     this.declineChallenge();
+                });
+
+                // Prevent zoom on double-tap
+                document.addEventListener('dblclick', (e) => {
+                    e.preventDefault();
                 });
             }
 
@@ -439,7 +552,7 @@
                     document.getElementById('username-section').classList.add('hidden');
                     document.getElementById('lobby-section').classList.remove('hidden');
                     document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('current-user').textContent = `Playing as: ${username}`;
+                    document.getElementById('current-user').textContent = `👤 ${username}`;
                 }, 1000);
             }
 
@@ -456,20 +569,28 @@
 
             updatePlayersList(players) {
                 const playersList = document.getElementById('players-list');
+                const onlineCount = document.getElementById('online-count');
                 const currentUserId = this.socketManager.socket?.id;
                 
+                // Update online count (include yourself)
+                onlineCount.textContent = players.length;
+                
+                // Filter out current user
                 const otherPlayers = players.filter(player => player.id !== currentUserId);
                 
                 if (otherPlayers.length === 0) {
-                    playersList.innerHTML = '<div class="empty-state">No other players online...</div>';
+                    playersList.innerHTML = '<div class="empty-state">No other players online...<br><small>Open another browser tab to test!</small></div>';
                     return;
                 }
 
                 playersList.innerHTML = otherPlayers.map(player => `
                     <div class="player-item">
-                        <span class="player-name">${player.username}</span>
+                        <div>
+                            <span class="player-name">${player.username}</span>
+                            <span class="player-status">🟢 Online</span>
+                        </div>
                         <button class="challenge-btn" data-player-id="${player.id}">
-                            CHALLENGE
+                            ⚡ CHALLENGE
                         </button>
                     </div>
                 `).join('');
@@ -512,15 +633,35 @@
             startRace(data) {
                 document.getElementById('loading').classList.add('hidden');
                 
-                // For now, just show an alert - we'll build the actual game next
-                alert(`Race starting against ${data.player2.username}! This is where the actual racing game will appear.`);
-                
-                // In the next step, we'll redirect to game.html or show the game interface
-                console.log('Race data:', data);
+                // For now, redirect to game page
+                window.location.href = `game.html?room=${data.roomId}&player1=${data.player1.username}&player2=${data.player2.username}`;
             }
 
             showStatus(message, type) {
-                this.socketManager.showStatus(message, type);
+                const status = document.createElement('div');
+                status.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    padding: 12px 24px;
+                    border-radius: 25px;
+                    color: white;
+                    font-weight: bold;
+                    z-index: 10000;
+                    background: ${type === 'success' ? 'linear-gradient(45deg, #4CAF50, #45a049)' : 
+                                 type === 'error' ? 'linear-gradient(45deg, #e74c3c, #c0392b)' : 
+                                 'linear-gradient(45deg, #2196F3, #1976D2)'};
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                `;
+                status.textContent = message;
+                document.body.appendChild(status);
+
+                setTimeout(() => {
+                    if (document.body.contains(status)) {
+                        document.body.removeChild(status);
+                    }
+                }, 3000);
             }
         }
 
