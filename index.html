@@ -42,21 +42,6 @@
             background-clip: text;
         }
 
-        header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-            margin-bottom: 10px;
-        }
-
-        .online-count {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            display: inline-block;
-            backdrop-filter: blur(10px);
-        }
-
         .section {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -92,7 +77,6 @@
             border-radius: 12px;
             font-size: 16px;
             background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         button {
@@ -103,7 +87,6 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         #join-btn {
@@ -111,9 +94,9 @@
             color: white;
         }
 
-        #join-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        #join-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
         }
 
         .players-list {
@@ -133,12 +116,6 @@
             background: rgba(255, 255, 255, 0.15);
             border-radius: 15px;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .player-item:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateX(5px);
         }
 
         .player-name {
@@ -155,16 +132,9 @@
             min-width: 120px;
         }
 
-        .challenge-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
-        }
-
         .challenge-btn:disabled {
             background: #666;
             cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
         }
 
         .empty-state {
@@ -172,7 +142,6 @@
             padding: 40px 20px;
             opacity: 0.7;
             font-style: italic;
-            font-size: 1.1em;
         }
 
         .notification {
@@ -197,8 +166,6 @@
             text-align: center;
             max-width: 400px;
             width: 100%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
         .challenge-content h3 {
@@ -211,13 +178,6 @@
             display: flex;
             gap: 15px;
             margin-top: 25px;
-            flex-direction: column;
-        }
-
-        @media (min-width: 480px) {
-            .challenge-buttons {
-                flex-direction: row;
-            }
         }
 
         .btn-accept {
@@ -263,38 +223,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 25px;
-            padding-top: 25px;
-            border-top: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        @media (min-width: 768px) {
-            .user-info {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
-        }
-
-        #current-user {
-            font-weight: bold;
-            font-size: 1.1em;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-align: center;
-        }
-
-        #leave-lobby {
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
-            color: white;
-            padding: 12px 25px;
-        }
-
         .connection-status {
             position: fixed;
             top: 10px;
@@ -304,7 +232,6 @@
             font-size: 0.9em;
             font-weight: bold;
             z-index: 100;
-            backdrop-filter: blur(10px);
         }
 
         .connected {
@@ -315,13 +242,22 @@
             background: rgba(231, 76, 60, 0.9);
         }
 
-        .debug-info {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
+        .error-box {
+            background: rgba(231, 76, 60, 0.9);
+            padding: 15px;
             border-radius: 10px;
-            font-size: 0.8em;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .retry-btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
             margin-top: 10px;
-            font-family: monospace;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -331,49 +267,45 @@
     <div class="container">
         <header>
             <h1>🚗 BOOST DASH</h1>
-            <p>Challenge players to intense 1v1 races!</p>
-            <div class="online-count">
-                <span id="online-count">0</span> players online
-            </div>
+            <p>Fast 1v1 Racing Game</p>
         </header>
 
         <div id="username-section" class="section">
-            <h2>🎯 Enter the Arena</h2>
+            <h2>Enter the Arena</h2>
             <div class="input-group">
-                <input type="text" id="username-input" placeholder="Enter your racer name" maxlength="20">
-                <button id="join-btn">🎮 JOIN LOBBY</button>
+                <input type="text" id="username-input" placeholder="Enter your racer name" maxlength="20" value="Player1">
+                <button id="join-btn">JOIN LOBBY</button>
             </div>
-            <div class="debug-info">
-                <div>Debug: Make sure both tabs have different usernames!</div>
-            </div>
+            <div id="connection-error" class="error-box hidden"></div>
         </div>
 
         <div id="lobby-section" class="section hidden">
-            <h2>👥 Online Racers <small>(<span id="online-count-lobby">0</span> online)</small></h2>
+            <h2>Online Racers (<span id="online-count">0</span>)</h2>
             <div id="players-list" class="players-list">
-                <div class="empty-state">Waiting for players to join...</div>
+                <div class="empty-state">No other players online</div>
             </div>
             
-            <div class="user-info">
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
                 <span id="current-user"></span>
-                <button id="leave-lobby">🚪 LEAVE LOBBY</button>
+                <button id="leave-lobby" style="float: right; background: #e74c3c;">LEAVE LOBBY</button>
             </div>
         </div>
 
         <div id="challenge-notification" class="notification hidden">
             <div class="challenge-content">
-                <h3>⚡ CHALLENGE!</h3>
+                <h3>CHALLENGE!</h3>
                 <p id="challenger-name">Player wants to race!</p>
                 <div class="challenge-buttons">
-                    <button id="accept-challenge" class="btn-accept">🎯 ACCEPT</button>
-                    <button id="decline-challenge" class="btn-decline">❌ DECLINE</button>
+                    <button id="accept-challenge" class="btn-accept">ACCEPT</button>
+                    <button id="decline-challenge" class="btn-decline">DECLINE</button>
                 </div>
             </div>
         </div>
 
         <div id="loading" class="loading hidden">
             <div class="spinner"></div>
-            <p id="loading-message">Starting race...</p>
+            <p id="loading-message">Connecting...</p>
+            <button id="cancel-loading" style="margin-top: 20px; background: #e74c3c;">Cancel</button>
         </div>
     </div>
 
@@ -384,58 +316,98 @@
                 this.socket = null;
                 this.isConnected = false;
                 this.serverUrl = 'https://race-back.onrender.com';
-                this.reconnectAttempts = 0;
-                this.maxReconnectAttempts = 5;
+                this.connectionTimeout = null;
                 this.connect();
             }
 
             connect() {
                 try {
                     console.log('🔌 Connecting to server...');
+                    this.showLoading('Connecting to server...');
+                    
                     this.socket = io(this.serverUrl, {
-                        transports: ['websocket', 'polling'],
-                        timeout: 10000
+                        timeout: 10000,
+                        transports: ['websocket', 'polling']
                     });
                     
-                    this.socket.on('connect', () => {
-                        console.log('✅ Connected to server with ID:', this.socket.id);
-                        this.isConnected = true;
-                        this.reconnectAttempts = 0;
-                        this.updateConnectionStatus('Connected', 'connected');
-                        
-                        // Rejoin lobby if we were previously in one
-                        const savedUsername = localStorage.getItem('boostDash_username');
-                        if (savedUsername) {
-                            this.emit('join-lobby', savedUsername);
+                    // Set connection timeout (8 seconds)
+                    this.connectionTimeout = setTimeout(() => {
+                        if (!this.isConnected) {
+                            console.log('⏰ Connection timeout');
+                            this.handleConnectionError('Connection timeout. Server might be starting up.');
                         }
+                    }, 8000);
+
+                    this.socket.on('connect', () => {
+                        console.log('✅ Connected to server');
+                        clearTimeout(this.connectionTimeout);
+                        this.isConnected = true;
+                        this.updateConnectionStatus('Connected', 'connected');
+                        this.hideLoading();
                     });
 
                     this.socket.on('disconnect', (reason) => {
-                        console.log('❌ Disconnected from server:', reason);
+                        console.log('❌ Disconnected:', reason);
                         this.isConnected = false;
                         this.updateConnectionStatus('Disconnected', 'disconnected');
                     });
 
                     this.socket.on('connect_error', (error) => {
                         console.error('🔌 Connection error:', error);
+                        clearTimeout(this.connectionTimeout);
                         this.isConnected = false;
-                        this.updateConnectionStatus('Connection Failed', 'disconnected');
-                        
-                        this.reconnectAttempts++;
-                        if (this.reconnectAttempts <= this.maxReconnectAttempts) {
-                            console.log(`🔄 Reconnecting... (attempt ${this.reconnectAttempts})`);
-                            setTimeout(() => this.connect(), 2000);
-                        }
+                        this.handleConnectionError('Failed to connect. Please check your internet connection.');
                     });
 
                 } catch (error) {
                     console.error('💥 Failed to connect:', error);
+                    this.handleConnectionError('Connection failed: ' + error.message);
                 }
+            }
+
+            handleConnectionError(message) {
+                this.isConnected = false;
+                this.updateConnectionStatus('Connection Failed', 'disconnected');
+                this.showConnectionError(message);
+                this.hideLoading();
+            }
+
+            showConnectionError(message) {
+                const errorBox = document.getElementById('connection-error');
+                errorBox.innerHTML = `
+                    <strong>Connection Error</strong><br>
+                    ${message}<br>
+                    <button class="retry-btn" onclick="window.socketManager.retryConnection()">Retry Connection</button>
+                `;
+                errorBox.classList.remove('hidden');
+            }
+
+            hideConnectionError() {
+                const errorBox = document.getElementById('connection-error');
+                errorBox.classList.add('hidden');
+            }
+
+            retryConnection() {
+                this.hideConnectionError();
+                this.disconnect();
+                this.connect();
+            }
+
+            showLoading(message) {
+                const loading = document.getElementById('loading');
+                const messageEl = document.getElementById('loading-message');
+                messageEl.textContent = message;
+                loading.classList.remove('hidden');
+            }
+
+            hideLoading() {
+                const loading = document.getElementById('loading');
+                loading.classList.add('hidden');
             }
 
             updateConnectionStatus(message, type) {
                 const statusEl = document.getElementById('connection-status');
-                statusEl.textContent = `🔗 ${message}`;
+                statusEl.textContent = `${message}`;
                 statusEl.className = `connection-status ${type}`;
                 statusEl.classList.remove('hidden');
             }
@@ -446,14 +418,14 @@
                     this.socket.emit(event, data);
                     return true;
                 } else {
-                    console.warn('⚠️ Socket not connected, cannot emit:', event);
+                    console.warn('⚠️ Socket not connected');
+                    this.showConnectionError('Not connected to server. Please retry.');
                     return false;
                 }
             }
 
             on(event, callback) {
                 if (this.socket) {
-                    console.log(`📥 Listening for ${event}`);
                     this.socket.on(event, callback);
                 }
             }
@@ -474,14 +446,6 @@
                 
                 this.initializeEventListeners();
                 this.setupSocketListeners();
-                this.checkExistingSession();
-            }
-
-            checkExistingSession() {
-                const savedUsername = localStorage.getItem('boostDash_username');
-                if (savedUsername) {
-                    document.getElementById('username-input').value = savedUsername;
-                }
             }
 
             initializeEventListeners() {
@@ -506,45 +470,43 @@
                 document.getElementById('decline-challenge').addEventListener('click', () => {
                     this.declineChallenge();
                 });
+
+                document.getElementById('cancel-loading').addEventListener('click', () => {
+                    this.hideLoading();
+                });
+
+                // Auto-join with a random username for testing
+                setTimeout(() => {
+                    const input = document.getElementById('username-input');
+                    if (!input.value) {
+                        input.value = 'Player' + Math.floor(Math.random() * 1000);
+                    }
+                }, 1000);
             }
 
             setupSocketListeners() {
-                // Online players list updates
                 this.socketManager.on('online-players', (players) => {
-                    console.log('📊 Online players updated:', players);
+                    console.log('📊 Online players:', players);
                     this.updatePlayersList(players);
                 });
 
-                // Challenge received
                 this.socketManager.on('challenge-received', (data) => {
                     console.log('🎯 Challenge received:', data);
                     this.showChallengeNotification(data);
                 });
 
-                // Challenge sent confirmation
                 this.socketManager.on('challenge-sent', (username) => {
-                    console.log('📨 Challenge sent to:', username);
-                    this.showStatus(`Challenge sent to ${username}`, 'info');
+                    this.showStatus(`Challenge sent to ${username}`);
                 });
 
-                // Race start
                 this.socketManager.on('race-start', (data) => {
                     console.log('🏁 Race starting:', data);
                     this.startRace(data);
                 });
 
-                // Challenge declined
-                this.socketManager.on('challenge-declined', () => {
-                    console.log('❌ Challenge was declined');
-                    this.showStatus('Challenge was declined', 'error');
-                    document.getElementById('loading').classList.add('hidden');
-                });
-
-                // Error handling
                 this.socketManager.on('error', (message) => {
-                    console.error('💥 Error:', message);
-                    this.showStatus(`Error: ${message}`, 'error');
-                    document.getElementById('loading').classList.add('hidden');
+                    this.showStatus(`Error: ${message}`);
+                    this.hideLoading();
                 });
             }
 
@@ -553,97 +515,73 @@
                 const username = usernameInput.value.trim();
 
                 if (!username) {
-                    this.showStatus('Please enter a username', 'error');
+                    this.showStatus('Please enter a username');
                     return;
                 }
 
-                if (username.length < 2) {
-                    this.showStatus('Username must be at least 2 characters', 'error');
-                    return;
-                }
+                // Disable join button to prevent multiple clicks
+                const joinBtn = document.getElementById('join-btn');
+                joinBtn.disabled = true;
+                joinBtn.textContent = 'Connecting...';
 
                 this.currentUser = username;
-                localStorage.setItem('boostDash_username', username);
                 
-                document.getElementById('loading').classList.remove('hidden');
-                document.getElementById('loading-message').textContent = 'Joining lobby...';
-                
-                // Wait for socket to be connected before joining
-                if (this.socketManager.isConnected) {
-                    this.socketManager.emit('join-lobby', username);
-                    this.showLobby();
-                } else {
-                    // Wait for connection
-                    const checkConnection = setInterval(() => {
-                        if (this.socketManager.isConnected) {
-                            clearInterval(checkConnection);
-                            this.socketManager.emit('join-lobby', username);
-                            this.showLobby();
-                        }
-                    }, 100);
-                }
+                // Wait for connection before joining lobby
+                const tryJoin = () => {
+                    if (this.socketManager.isConnected) {
+                        this.socketManager.emit('join-lobby', username);
+                        this.showLobby();
+                        joinBtn.disabled = false;
+                        joinBtn.textContent = 'JOIN LOBBY';
+                    } else {
+                        // Wait 500ms and try again
+                        setTimeout(tryJoin, 500);
+                    }
+                };
+
+                // Start trying to join
+                tryJoin();
             }
 
             showLobby() {
-                setTimeout(() => {
-                    document.getElementById('username-section').classList.add('hidden');
-                    document.getElementById('lobby-section').classList.remove('hidden');
-                    document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('current-user').textContent = `👤 ${this.currentUser}`;
-                }, 500);
+                document.getElementById('username-section').classList.add('hidden');
+                document.getElementById('lobby-section').classList.remove('hidden');
+                document.getElementById('current-user').textContent = `Playing as: ${this.currentUser}`;
             }
 
             leaveLobby() {
                 this.socketManager.disconnect();
                 this.currentUser = null;
-                localStorage.removeItem('boostDash_username');
                 
                 document.getElementById('lobby-section').classList.add('hidden');
                 document.getElementById('username-section').classList.remove('hidden');
-                document.getElementById('username-input').value = '';
                 
-                setTimeout(() => this.socketManager.connect(), 1000);
+                // Reconnect after leaving
+                setTimeout(() => {
+                    this.socketManager.connect();
+                }, 1000);
             }
 
             updatePlayersList(players) {
                 const playersList = document.getElementById('players-list');
                 const onlineCount = document.getElementById('online-count');
-                const onlineCountLobby = document.getElementById('online-count-lobby');
                 const currentUserId = this.socketManager.socket?.id;
                 
-                console.log('Updating players list. Current ID:', currentUserId, 'All players:', players);
-                
-                // Update online counts
                 onlineCount.textContent = players.length;
-                onlineCountLobby.textContent = players.length;
                 
                 // Filter out current user
                 const otherPlayers = players.filter(player => player.id !== currentUserId);
                 
-                console.log('Other players:', otherPlayers);
-                
                 if (otherPlayers.length === 0) {
-                    playersList.innerHTML = `
-                        <div class="empty-state">
-                            No other players online...<br>
-                            <small>💡 Open another browser tab with a different username to test!</small>
-                            <br><br>
-                            <strong>Debug Info:</strong><br>
-                            Your ID: ${currentUserId || 'Not connected'}<br>
-                            Total Players: ${players.length}
-                        </div>
-                    `;
+                    playersList.innerHTML = '<div class="empty-state">No other players online<br><small>Open another tab to test!</small></div>';
                     return;
                 }
 
                 playersList.innerHTML = otherPlayers.map(player => `
                     <div class="player-item">
-                        <div>
-                            <span class="player-name">${player.username}</span>
-                            <span class="player-status">🟢 Online</span>
-                        </div>
+                        <span class="player-name">${player.username}</span>
                         <button class="challenge-btn" data-player-id="${player.id}">
-                            ⚡ CHALLENGE
+                            CHALLENGE
                         </button>
                     </div>
                 `).join('');
@@ -652,23 +590,18 @@
                 playersList.querySelectorAll('.challenge-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const playerId = e.target.getAttribute('data-player-id');
-                        console.log('Sending challenge to:', playerId);
                         this.sendChallenge(playerId);
-                        
-                        // Show loading and disable button
-                        document.getElementById('loading').classList.remove('hidden');
-                        document.getElementById('loading-message').textContent = 'Waiting for opponent to accept...';
                         e.target.disabled = true;
-                        e.target.textContent = '⏳ Waiting...';
+                        e.target.textContent = 'SENT...';
                     });
                 });
             }
 
             sendChallenge(playerId) {
+                this.socketManager.showLoading('Sending challenge...');
                 const success = this.socketManager.emit('challenge-player', playerId);
                 if (!success) {
-                    this.showStatus('Not connected to server', 'error');
-                    document.getElementById('loading').classList.add('hidden');
+                    this.socketManager.hideLoading();
                 }
             }
 
@@ -680,11 +613,9 @@
 
             acceptChallenge() {
                 if (this.pendingChallenge) {
-                    console.log('Accepting challenge from:', this.pendingChallenge.challengerId);
                     this.socketManager.emit('accept-challenge', this.pendingChallenge.challengerId);
                     document.getElementById('challenge-notification').classList.add('hidden');
-                    document.getElementById('loading').classList.remove('hidden');
-                    document.getElementById('loading-message').textContent = 'Starting race...';
+                    this.socketManager.showLoading('Starting race...');
                     this.pendingChallenge = null;
                 }
             }
@@ -698,49 +629,29 @@
             }
 
             startRace(data) {
-                console.log('Redirecting to game with data:', data);
-                document.getElementById('loading-message').textContent = 'Race starting!';
-                
-                // Store race data and redirect
-                localStorage.setItem('boostDash_raceData', JSON.stringify(data));
-                
-                setTimeout(() => {
-                    window.location.href = `game.html?room=${data.roomId}`;
-                }, 1000);
+                this.socketManager.hideLoading();
+                // For now, just alert - we'll implement the actual game next
+                alert(`Race starting against ${data.player2.username}! Game would start now.`);
+                console.log('Race data:', data);
             }
 
-            showStatus(message, type) {
-                const status = document.createElement('div');
-                status.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    padding: 12px 24px;
-                    border-radius: 25px;
-                    color: white;
-                    font-weight: bold;
-                    z-index: 10000;
-                    background: ${type === 'success' ? 'linear-gradient(45deg, #4CAF50, #45a049)' : 
-                                 type === 'error' ? 'linear-gradient(45deg, #e74c3c, #c0392b)' : 
-                                 'linear-gradient(45deg, #2196F3, #1976D2)'};
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-                `;
-                status.textContent = message;
-                document.body.appendChild(status);
+            hideLoading() {
+                this.socketManager.hideLoading();
+            }
 
-                setTimeout(() => {
-                    if (document.body.contains(status)) {
-                        document.body.removeChild(status);
-                    }
-                }, 3000);
+            showStatus(message) {
+                // Simple status message
+                console.log('Status:', message);
             }
         }
 
-        // Initialize the lobby when page loads
+        // Make socketManager globally available for retry button
+        window.socketManager = null;
+
+        // Initialize when page loads
         document.addEventListener('DOMContentLoaded', () => {
+            window.socketManager = new SocketManager();
             window.lobbyManager = new LobbyManager();
-            console.log('🎮 Lobby manager initialized');
         });
     </script>
 </body>
