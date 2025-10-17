@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 Boost Dash - Racing!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .race-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .boost-meter {
+            width: 100px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .boost-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s ease;
+        }
+
+        .track-container {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(90deg, #34495e, #2c3e50);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .track {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: #7f8c8d;
+            transform: translateY(-50%);
+            border: 3px solid #34495e;
+        }
+
+        .track-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 40px,
+                white 40px,
+                white 80px
+            );
+            animation: moveLines 1s linear infinite;
+        }
+
+        @keyframes moveLines {
+            from { transform: translateX(0); }
+            to { transform: translateX(-80px); }
+        }
+
+        .player-car {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background: #e74c3c;
+            border-radius: 5px;
+            transition: left 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .player1-car {
+            top: 35%;
+            background: #e74c3c;
+        }
+
+        .player2-car {
+            top: 65%;
+            background: #3498db;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+
+        .control-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        #accelerate-btn {
+            background: #4CAF50;
+        }
+
+        #boost-btn {
+            background: #FF9800;
+        }
+
+        #drift-btn {
+            background: #9C27B0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s ease;
+        }
+
+        .finish-line {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 10px;
+            background: repeating-linear-gradient(
+                0deg,
+                white,
+                white 10px,
+                black 10px,
+                black 20px
+            );
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .results-content {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .winner-text {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #e74c3c;
+        }
+
+        #back-to-lobby {
+            background: #3498db;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="race-info">
+            <div class="player-info">
+                <div>YOU</div>
+                <div class="boost-meter">
+                    <div class="boost-fill" id="player1-boost" style="width: 100%;"></div>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="race-progress" style="width: 0%;"></div>
+            </div>
+            
+            <div class="player-info">
+                <div>OPPONENT</div>
+                <div class="boost-meter">
+                    <div class="boost-fill" id="player2-boost" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="track-container">
+            <div class="track">
+                <div class="track-lines"></div>
+                <div class="finish-line"></div>
+                <div class="player-car player1-car" id="player1-car" style="left: 50px;">YOU</div>
+                <div class="player-car player2-car" id="player2-car" style="left: 50px;">OPP</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" id="accelerate-btn">ACCELERATE</button>
+            <button class="control-btn" id="boost-btn">BOOST</button>
+            <button class="control-btn" id="drift-btn">DRIFT</button>
+        </div>
+    </div>
+
+    <div id="results-screen" class="hidden">
+        <div class="results-content">
+            <div class="winner-text" id="winner-text">RACE FINISHED!</div>
+            <div id="results-message">Calculating results...</div>
+            <button id="back-to-lobby">BACK TO LOBBY</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        class RacingGame {
+            constructor() {
+                this.socket = io('https://race-back.onrender.com');
+                this.gameState = null;
+                this.roomId = null;
+                this.isRacing = false;
+                
+                this.initializeControls();
+                this.setupSocketListeners();
+                this.startGameLoop();
+            }
+
+            initializeControls() {
+                // Accelerate button (hold to accelerate)
+                const accelerateBtn = document.getElementById('accelerate-btn');
+                let accelerateInterval;
+
+                accelerateBtn.addEventListener('mousedown', () => {
+                    this.sendAction('accelerate');
+                    accelerateInterval = setInterval(() => {
+                        this.sendAction('accelerate');
+                    }, 100);
+                });
+
+                accelerateBtn.addEventListener('mouseup', () => {
+                    clearInterval(accelerateInterval);
+                });
+
+                accelerateBtn.addEventListener('mouseleave', () => {
+                    clearInterval(accelerateInterval);
+                });
+
+                // Touch events for mobile
+                accelerateBtn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.sendAction('accelerate');
+                    accelerateInterval = setInterval(() => {
+                        this.sendAction('accelerate');
+                    }, 100);
+                });
+
+                accelerateBtn.addEventListener('touchend', () => {
+                    clearInterval(accelerateInterval);
+                });
+
+                // Boost button (tap to boost)
+                document.getElementById('boost-btn').addEventListener('click', () => {
+                    this.sendAction('boost');
+                });
+
+                // Drift button (hold to drift)
+                const driftBtn = document.getElementById('drift-btn');
+                let driftActive = false;
+
+                driftBtn.addEventListener('mousedown', () => {
+                    driftActive = true;
+                    this.sendAction('drift-start');
+                });
+
+                driftBtn.addEventListener('mouseup', () => {
+                    driftActive = false;
+                    this.sendAction('drift-end');
+                });
+
+                driftBtn.addEventListener('mouseleave', () => {
+                    if (driftActive) {
+                        driftActive = false;
+                        this.sendAction('drift-end');
+                    }
+                });
+
+                // Back to lobby button
+                document.getElementById('back-to-lobby').addEventListener('click', () => {
+                    window.location.href = '/';
+                });
+            }
+
+            setupSocketListeners() {
+                this.socket.on('game-update', (gameState) => {
+                    this.gameState = gameState;
+                    this.updateGameDisplay();
+                });
+
+                this.socket.on('race-end', (results) => {
+                    this.showResults(results);
+                });
+
+                this.socket.on('opponent-disconnected', () => {
+                    this.showResults({ winner: this.socket.id, winnerName: 'You', reason: 'Opponent disconnected' });
+                });
+            }
+
+            sendAction(action) {
+                if (this.roomId) {
+                    this.socket.emit('player-action', {
+                        roomId: this.roomId,
+                        action: action
+                    });
+                }
+            }
+
+            updateGameDisplay() {
+                if (!this.gameState) return;
+
+                const player1 = this.gameState.player1;
+                const player2 = this.gameState.player2;
+
+                // Update boost meters
+                document.getElementById('player1-boost').style.width = player1.boost + '%';
+                document.getElementById('player2-boost').style.width = player2.boost + '%';
+
+                // Update car positions (convert progress 0-1000 to pixels)
+                const trackWidth = document.querySelector('.track-container').offsetWidth - 70;
+                const player1Pos = (player1.progress / 1000) * trackWidth;
+                const player2Pos = (player2.progress / 1000) * trackWidth;
+
+                document.getElementById('player1-car').style.left = (50 + player1Pos) + 'px';
+                document.getElementById('player2-car').style.left = (50 + player2Pos) + 'px';
+
+                // Update overall progress (show leading player's progress)
+                const leadingProgress = Math.max(player1.progress, player2.progress);
+                document.getElementById('race-progress').style.width = (leadingProgress / 10) + '%';
+
+                // Check if race finished
+                if (this.gameState.finished && !this.isRacing) {
+                    this.isRacing = false;
+                }
+            }
+
+            showResults(results) {
+                const resultsScreen = document.getElementById('results-screen');
+                const winnerText = document.getElementById('winner-text');
+                const resultsMessage = document.getElementById('results-message');
+
+                if (results.winner === this.socket.id) {
+                    winnerText.textContent = '🏆 YOU WIN! 🏆';
+                    winnerText.style.color = '#4CAF50';
+                    resultsMessage.textContent = 'Congratulations! You are the champion!';
+                } else {
+                    winnerText.textContent = '💔 YOU LOSE';
+                    winnerText.style.color = '#e74c3c';
+                    resultsMessage.textContent = `Better luck next time! ${results.winnerName} won the race.`;
+                }
+
+                resultsScreen.classList.remove('hidden');
+            }
+
+            startGameLoop() {
+                // Game loop for continuous updates
+                setInterval(() => {
+                    if (this.gameState) {
+                        this.updateGameDisplay();
+                    }
+                }, 50);
+            }
+        }
+
+        // Start the game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new RacingGame();
+        });
+    </script>
+</body>
+</html>
