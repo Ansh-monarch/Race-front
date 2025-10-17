@@ -2,7 +2,29 @@
   "name": "race-front",
   "version": "1.0.0",
   "description": "Frontend for Boost Dash racing game",
+  "main": "index.html",
   "scripts": {
-    "start": "echo 'Static site - no build required'"
+    "start": "echo 'Static site - no build required'",
+    "dev": "echo 'Development mode - use live server'"
+  },
+  "keywords": [
+    "racing",
+    "game",
+    "multiplayer",
+    "socketio"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/Race-front"
+  },
+  "files": [
+    "index.html",
+    "game.html",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
