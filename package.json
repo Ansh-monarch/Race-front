@@ -1,0 +1,8 @@
+{
+  "name": "race-front",
+  "version": "1.0.0",
+  "description": "Frontend for Boost Dash racing game",
+  "scripts": {
+    "start": "echo 'Static site - no build required'"
+  }
+}
