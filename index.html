@@ -260,6 +260,9 @@
             cursor: pointer;
         }
     </style>
+    
+    <!-- Load Socket.io client from CDN -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
     <div id="connection-status" class="connection-status hidden"></div>
@@ -309,350 +312,363 @@
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
     <script>
-        class SocketManager {
-            constructor() {
-                this.socket = null;
-                this.isConnected = false;
-                this.serverUrl = 'https://race-back.onrender.com';
-                this.connectionTimeout = null;
-                this.connect();
-            }
-
-            connect() {
-                try {
-                    console.log('🔌 Connecting to server...');
-                    this.showLoading('Connecting to server...');
-                    
-                    this.socket = io(this.serverUrl, {
-                        timeout: 10000,
-                        transports: ['websocket', 'polling']
-                    });
-                    
-                    // Set connection timeout (8 seconds)
-                    this.connectionTimeout = setTimeout(() => {
-                        if (!this.isConnected) {
-                            console.log('⏰ Connection timeout');
-                            this.handleConnectionError('Connection timeout. Server might be starting up.');
-                        }
-                    }, 8000);
-
-                    this.socket.on('connect', () => {
-                        console.log('✅ Connected to server');
-                        clearTimeout(this.connectionTimeout);
-                        this.isConnected = true;
-                        this.updateConnectionStatus('Connected', 'connected');
-                        this.hideLoading();
-                    });
-
-                    this.socket.on('disconnect', (reason) => {
-                        console.log('❌ Disconnected:', reason);
-                        this.isConnected = false;
-                        this.updateConnectionStatus('Disconnected', 'disconnected');
-                    });
-
-                    this.socket.on('connect_error', (error) => {
-                        console.error('🔌 Connection error:', error);
-                        clearTimeout(this.connectionTimeout);
-                        this.isConnected = false;
-                        this.handleConnectionError('Failed to connect. Please check your internet connection.');
-                    });
-
-                } catch (error) {
-                    console.error('💥 Failed to connect:', error);
-                    this.handleConnectionError('Connection failed: ' + error.message);
-                }
-            }
-
-            handleConnectionError(message) {
-                this.isConnected = false;
-                this.updateConnectionStatus('Connection Failed', 'disconnected');
-                this.showConnectionError(message);
-                this.hideLoading();
-            }
-
-            showConnectionError(message) {
-                const errorBox = document.getElementById('connection-error');
-                errorBox.innerHTML = `
-                    <strong>Connection Error</strong><br>
-                    ${message}<br>
-                    <button class="retry-btn" onclick="window.socketManager.retryConnection()">Retry Connection</button>
+        // Wait for Socket.io to load before initializing
+        function initializeApp() {
+            if (typeof io === 'undefined') {
+                console.error('Socket.io not loaded!');
+                document.getElementById('connection-error').innerHTML = `
+                    <strong>Socket.io Library Error</strong><br>
+                    Failed to load Socket.io library. Please refresh the page.<br>
+                    <button class="retry-btn" onclick="window.location.reload()">Refresh Page</button>
                 `;
-                errorBox.classList.remove('hidden');
+                document.getElementById('connection-error').classList.remove('hidden');
+                return;
             }
 
-            hideConnectionError() {
-                const errorBox = document.getElementById('connection-error');
-                errorBox.classList.add('hidden');
-            }
-
-            retryConnection() {
-                this.hideConnectionError();
-                this.disconnect();
-                this.connect();
-            }
-
-            showLoading(message) {
-                const loading = document.getElementById('loading');
-                const messageEl = document.getElementById('loading-message');
-                messageEl.textContent = message;
-                loading.classList.remove('hidden');
-            }
-
-            hideLoading() {
-                const loading = document.getElementById('loading');
-                loading.classList.add('hidden');
-            }
-
-            updateConnectionStatus(message, type) {
-                const statusEl = document.getElementById('connection-status');
-                statusEl.textContent = `${message}`;
-                statusEl.className = `connection-status ${type}`;
-                statusEl.classList.remove('hidden');
-            }
-
-            emit(event, data) {
-                if (this.socket && this.isConnected) {
-                    console.log(`📤 Emitting ${event}:`, data);
-                    this.socket.emit(event, data);
-                    return true;
-                } else {
-                    console.warn('⚠️ Socket not connected');
-                    this.showConnectionError('Not connected to server. Please retry.');
-                    return false;
+            class SocketManager {
+                constructor() {
+                    this.socket = null;
+                    this.isConnected = false;
+                    this.serverUrl = 'https://race-back.onrender.com';
+                    this.connectionTimeout = null;
+                    this.connect();
                 }
-            }
 
-            on(event, callback) {
-                if (this.socket) {
-                    this.socket.on(event, callback);
-                }
-            }
+                connect() {
+                    try {
+                        console.log('🔌 Connecting to server...');
+                        this.showLoading('Connecting to server...');
+                        
+                        this.socket = io(this.serverUrl, {
+                            timeout: 10000,
+                            transports: ['websocket', 'polling']
+                        });
+                        
+                        // Set connection timeout (8 seconds)
+                        this.connectionTimeout = setTimeout(() => {
+                            if (!this.isConnected) {
+                                console.log('⏰ Connection timeout');
+                                this.handleConnectionError('Connection timeout. Server might be starting up.');
+                            }
+                        }, 8000);
 
-            disconnect() {
-                if (this.socket) {
-                    this.socket.disconnect();
-                }
-            }
-        }
+                        this.socket.on('connect', () => {
+                            console.log('✅ Connected to server');
+                            clearTimeout(this.connectionTimeout);
+                            this.isConnected = true;
+                            this.updateConnectionStatus('Connected', 'connected');
+                            this.hideLoading();
+                            this.hideConnectionError();
+                        });
 
-        class LobbyManager {
-            constructor() {
-                this.currentUser = null;
-                this.onlinePlayers = [];
-                this.pendingChallenge = null;
-                this.socketManager = new SocketManager();
-                
-                this.initializeEventListeners();
-                this.setupSocketListeners();
-            }
+                        this.socket.on('disconnect', (reason) => {
+                            console.log('❌ Disconnected:', reason);
+                            this.isConnected = false;
+                            this.updateConnectionStatus('Disconnected', 'disconnected');
+                        });
 
-            initializeEventListeners() {
-                document.getElementById('join-btn').addEventListener('click', () => {
-                    this.joinLobby();
-                });
+                        this.socket.on('connect_error', (error) => {
+                            console.error('🔌 Connection error:', error);
+                            clearTimeout(this.connectionTimeout);
+                            this.isConnected = false;
+                            this.handleConnectionError('Failed to connect to server. Please try again.');
+                        });
 
-                document.getElementById('username-input').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        this.joinLobby();
+                    } catch (error) {
+                        console.error('💥 Failed to connect:', error);
+                        this.handleConnectionError('Connection failed: ' + error.message);
                     }
-                });
-
-                document.getElementById('leave-lobby').addEventListener('click', () => {
-                    this.leaveLobby();
-                });
-
-                document.getElementById('accept-challenge').addEventListener('click', () => {
-                    this.acceptChallenge();
-                });
-
-                document.getElementById('decline-challenge').addEventListener('click', () => {
-                    this.declineChallenge();
-                });
-
-                document.getElementById('cancel-loading').addEventListener('click', () => {
-                    this.hideLoading();
-                });
-
-                // Auto-join with a random username for testing
-                setTimeout(() => {
-                    const input = document.getElementById('username-input');
-                    if (!input.value) {
-                        input.value = 'Player' + Math.floor(Math.random() * 1000);
-                    }
-                }, 1000);
-            }
-
-            setupSocketListeners() {
-                this.socketManager.on('online-players', (players) => {
-                    console.log('📊 Online players:', players);
-                    this.updatePlayersList(players);
-                });
-
-                this.socketManager.on('challenge-received', (data) => {
-                    console.log('🎯 Challenge received:', data);
-                    this.showChallengeNotification(data);
-                });
-
-                this.socketManager.on('challenge-sent', (username) => {
-                    this.showStatus(`Challenge sent to ${username}`);
-                });
-
-                this.socketManager.on('race-start', (data) => {
-                    console.log('🏁 Race starting:', data);
-                    this.startRace(data);
-                });
-
-                this.socketManager.on('error', (message) => {
-                    this.showStatus(`Error: ${message}`);
-                    this.hideLoading();
-                });
-            }
-
-            joinLobby() {
-                const usernameInput = document.getElementById('username-input');
-                const username = usernameInput.value.trim();
-
-                if (!username) {
-                    this.showStatus('Please enter a username');
-                    return;
                 }
 
-                // Disable join button to prevent multiple clicks
-                const joinBtn = document.getElementById('join-btn');
-                joinBtn.disabled = true;
-                joinBtn.textContent = 'Connecting...';
+                handleConnectionError(message) {
+                    this.isConnected = false;
+                    this.updateConnectionStatus('Connection Failed', 'disconnected');
+                    this.showConnectionError(message);
+                    this.hideLoading();
+                }
 
-                this.currentUser = username;
-                
-                // Wait for connection before joining lobby
-                const tryJoin = () => {
-                    if (this.socketManager.isConnected) {
-                        this.socketManager.emit('join-lobby', username);
-                        this.showLobby();
-                        joinBtn.disabled = false;
-                        joinBtn.textContent = 'JOIN LOBBY';
+                showConnectionError(message) {
+                    const errorBox = document.getElementById('connection-error');
+                    errorBox.innerHTML = `
+                        <strong>Connection Error</strong><br>
+                        ${message}<br>
+                        <button class="retry-btn" onclick="window.socketManager.retryConnection()">Retry Connection</button>
+                    `;
+                    errorBox.classList.remove('hidden');
+                }
+
+                hideConnectionError() {
+                    const errorBox = document.getElementById('connection-error');
+                    errorBox.classList.add('hidden');
+                }
+
+                retryConnection() {
+                    this.hideConnectionError();
+                    this.disconnect();
+                    this.connect();
+                }
+
+                showLoading(message) {
+                    const loading = document.getElementById('loading');
+                    const messageEl = document.getElementById('loading-message');
+                    messageEl.textContent = message;
+                    loading.classList.remove('hidden');
+                }
+
+                hideLoading() {
+                    const loading = document.getElementById('loading');
+                    loading.classList.add('hidden');
+                }
+
+                updateConnectionStatus(message, type) {
+                    const statusEl = document.getElementById('connection-status');
+                    statusEl.textContent = `${message}`;
+                    statusEl.className = `connection-status ${type}`;
+                    statusEl.classList.remove('hidden');
+                }
+
+                emit(event, data) {
+                    if (this.socket && this.isConnected) {
+                        console.log(`📤 Emitting ${event}:`, data);
+                        this.socket.emit(event, data);
+                        return true;
                     } else {
-                        // Wait 500ms and try again
-                        setTimeout(tryJoin, 500);
+                        console.warn('⚠️ Socket not connected');
+                        this.showConnectionError('Not connected to server. Please retry.');
+                        return false;
                     }
-                };
-
-                // Start trying to join
-                tryJoin();
-            }
-
-            showLobby() {
-                document.getElementById('username-section').classList.add('hidden');
-                document.getElementById('lobby-section').classList.remove('hidden');
-                document.getElementById('current-user').textContent = `Playing as: ${this.currentUser}`;
-            }
-
-            leaveLobby() {
-                this.socketManager.disconnect();
-                this.currentUser = null;
-                
-                document.getElementById('lobby-section').classList.add('hidden');
-                document.getElementById('username-section').classList.remove('hidden');
-                
-                // Reconnect after leaving
-                setTimeout(() => {
-                    this.socketManager.connect();
-                }, 1000);
-            }
-
-            updatePlayersList(players) {
-                const playersList = document.getElementById('players-list');
-                const onlineCount = document.getElementById('online-count');
-                const currentUserId = this.socketManager.socket?.id;
-                
-                onlineCount.textContent = players.length;
-                
-                // Filter out current user
-                const otherPlayers = players.filter(player => player.id !== currentUserId);
-                
-                if (otherPlayers.length === 0) {
-                    playersList.innerHTML = '<div class="empty-state">No other players online<br><small>Open another tab to test!</small></div>';
-                    return;
                 }
 
-                playersList.innerHTML = otherPlayers.map(player => `
-                    <div class="player-item">
-                        <span class="player-name">${player.username}</span>
-                        <button class="challenge-btn" data-player-id="${player.id}">
-                            CHALLENGE
-                        </button>
-                    </div>
-                `).join('');
+                on(event, callback) {
+                    if (this.socket) {
+                        this.socket.on(event, callback);
+                    }
+                }
 
-                // Add event listeners to challenge buttons
-                playersList.querySelectorAll('.challenge-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const playerId = e.target.getAttribute('data-player-id');
-                        this.sendChallenge(playerId);
-                        e.target.disabled = true;
-                        e.target.textContent = 'SENT...';
+                disconnect() {
+                    if (this.socket) {
+                        this.socket.disconnect();
+                    }
+                }
+            }
+
+            class LobbyManager {
+                constructor() {
+                    this.currentUser = null;
+                    this.onlinePlayers = [];
+                    this.pendingChallenge = null;
+                    this.socketManager = new SocketManager();
+                    
+                    this.initializeEventListeners();
+                    this.setupSocketListeners();
+                }
+
+                initializeEventListeners() {
+                    document.getElementById('join-btn').addEventListener('click', () => {
+                        this.joinLobby();
                     });
-                });
-            }
 
-            sendChallenge(playerId) {
-                this.socketManager.showLoading('Sending challenge...');
-                const success = this.socketManager.emit('challenge-player', playerId);
-                if (!success) {
+                    document.getElementById('username-input').addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            this.joinLobby();
+                        }
+                    });
+
+                    document.getElementById('leave-lobby').addEventListener('click', () => {
+                        this.leaveLobby();
+                    });
+
+                    document.getElementById('accept-challenge').addEventListener('click', () => {
+                        this.acceptChallenge();
+                    });
+
+                    document.getElementById('decline-challenge').addEventListener('click', () => {
+                        this.declineChallenge();
+                    });
+
+                    document.getElementById('cancel-loading').addEventListener('click', () => {
+                        this.socketManager.hideLoading();
+                    });
+
+                    // Auto-join with a random username for testing
+                    setTimeout(() => {
+                        const input = document.getElementById('username-input');
+                        if (!input.value) {
+                            input.value = 'Player' + Math.floor(Math.random() * 1000);
+                        }
+                    }, 1000);
+                }
+
+                setupSocketListeners() {
+                    this.socketManager.on('online-players', (players) => {
+                        console.log('📊 Online players:', players);
+                        this.updatePlayersList(players);
+                    });
+
+                    this.socketManager.on('challenge-received', (data) => {
+                        console.log('🎯 Challenge received:', data);
+                        this.showChallengeNotification(data);
+                    });
+
+                    this.socketManager.on('challenge-sent', (username) => {
+                        this.showStatus(`Challenge sent to ${username}`);
+                        this.socketManager.hideLoading();
+                    });
+
+                    this.socketManager.on('race-start', (data) => {
+                        console.log('🏁 Race starting:', data);
+                        this.startRace(data);
+                    });
+
+                    this.socketManager.on('error', (message) => {
+                        this.showStatus(`Error: ${message}`);
+                        this.socketManager.hideLoading();
+                    });
+                }
+
+                joinLobby() {
+                    const usernameInput = document.getElementById('username-input');
+                    const username = usernameInput.value.trim();
+
+                    if (!username) {
+                        alert('Please enter a username');
+                        return;
+                    }
+
+                    // Disable join button to prevent multiple clicks
+                    const joinBtn = document.getElementById('join-btn');
+                    joinBtn.disabled = true;
+                    joinBtn.textContent = 'Connecting...';
+
+                    this.currentUser = username;
+                    
+                    // Wait for connection before joining lobby
+                    const tryJoin = () => {
+                        if (this.socketManager.isConnected) {
+                            this.socketManager.emit('join-lobby', username);
+                            this.showLobby();
+                            joinBtn.disabled = false;
+                            joinBtn.textContent = 'JOIN LOBBY';
+                        } else {
+                            // Wait 500ms and try again
+                            setTimeout(tryJoin, 500);
+                        }
+                    };
+
+                    // Start trying to join
+                    tryJoin();
+                }
+
+                showLobby() {
+                    document.getElementById('username-section').classList.add('hidden');
+                    document.getElementById('lobby-section').classList.remove('hidden');
+                    document.getElementById('current-user').textContent = `Playing as: ${this.currentUser}`;
+                }
+
+                leaveLobby() {
+                    this.socketManager.disconnect();
+                    this.currentUser = null;
+                    
+                    document.getElementById('lobby-section').classList.add('hidden');
+                    document.getElementById('username-section').classList.remove('hidden');
+                    
+                    // Reconnect after leaving
+                    setTimeout(() => {
+                        this.socketManager.connect();
+                    }, 1000);
+                }
+
+                updatePlayersList(players) {
+                    const playersList = document.getElementById('players-list');
+                    const onlineCount = document.getElementById('online-count');
+                    const currentUserId = this.socketManager.socket?.id;
+                    
+                    onlineCount.textContent = players.length;
+                    
+                    // Filter out current user
+                    const otherPlayers = players.filter(player => player.id !== currentUserId);
+                    
+                    if (otherPlayers.length === 0) {
+                        playersList.innerHTML = '<div class="empty-state">No other players online<br><small>Open another tab to test!</small></div>';
+                        return;
+                    }
+
+                    playersList.innerHTML = otherPlayers.map(player => `
+                        <div class="player-item">
+                            <span class="player-name">${player.username}</span>
+                            <button class="challenge-btn" data-player-id="${player.id}">
+                                CHALLENGE
+                            </button>
+                        </div>
+                    `).join('');
+
+                    // Add event listeners to challenge buttons
+                    playersList.querySelectorAll('.challenge-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const playerId = e.target.getAttribute('data-player-id');
+                            this.sendChallenge(playerId);
+                            e.target.disabled = true;
+                            e.target.textContent = 'SENT...';
+                        });
+                    });
+                }
+
+                sendChallenge(playerId) {
+                    this.socketManager.showLoading('Sending challenge...');
+                    const success = this.socketManager.emit('challenge-player', playerId);
+                    if (!success) {
+                        this.socketManager.hideLoading();
+                    }
+                }
+
+                showChallengeNotification(data) {
+                    this.pendingChallenge = data;
+                    document.getElementById('challenger-name').textContent = `${data.challengerName} wants to race!`;
+                    document.getElementById('challenge-notification').classList.remove('hidden');
+                }
+
+                acceptChallenge() {
+                    if (this.pendingChallenge) {
+                        this.socketManager.emit('accept-challenge', this.pendingChallenge.challengerId);
+                        document.getElementById('challenge-notification').classList.add('hidden');
+                        this.socketManager.showLoading('Starting race...');
+                        this.pendingChallenge = null;
+                    }
+                }
+
+                declineChallenge() {
+                    if (this.pendingChallenge) {
+                        this.socketManager.emit('decline-challenge', this.pendingChallenge.challengerId);
+                        document.getElementById('challenge-notification').classList.add('hidden');
+                        this.pendingChallenge = null;
+                    }
+                }
+
+                startRace(data) {
                     this.socketManager.hideLoading();
+                    // For now, just alert - we'll implement the actual game next
+                    alert(`Race starting against ${data.player2.username}! Game would start now.`);
+                    console.log('Race data:', data);
+                }
+
+                showStatus(message) {
+                    // Simple status message
+                    console.log('Status:', message);
                 }
             }
 
-            showChallengeNotification(data) {
-                this.pendingChallenge = data;
-                document.getElementById('challenger-name').textContent = `${data.challengerName} wants to race!`;
-                document.getElementById('challenge-notification').classList.remove('hidden');
-            }
-
-            acceptChallenge() {
-                if (this.pendingChallenge) {
-                    this.socketManager.emit('accept-challenge', this.pendingChallenge.challengerId);
-                    document.getElementById('challenge-notification').classList.add('hidden');
-                    this.socketManager.showLoading('Starting race...');
-                    this.pendingChallenge = null;
-                }
-            }
-
-            declineChallenge() {
-                if (this.pendingChallenge) {
-                    this.socketManager.emit('decline-challenge', this.pendingChallenge.challengerId);
-                    document.getElementById('challenge-notification').classList.add('hidden');
-                    this.pendingChallenge = null;
-                }
-            }
-
-            startRace(data) {
-                this.socketManager.hideLoading();
-                // For now, just alert - we'll implement the actual game next
-                alert(`Race starting against ${data.player2.username}! Game would start now.`);
-                console.log('Race data:', data);
-            }
-
-            hideLoading() {
-                this.socketManager.hideLoading();
-            }
-
-            showStatus(message) {
-                // Simple status message
-                console.log('Status:', message);
-            }
-        }
-
-        // Make socketManager globally available for retry button
-        window.socketManager = null;
-
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', () => {
+            // Make socketManager globally available for retry button
             window.socketManager = new SocketManager();
             window.lobbyManager = new LobbyManager();
-        });
+        }
+
+        // Initialize when page loads and Socket.io is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
     </script>
 </body>
 </html>
